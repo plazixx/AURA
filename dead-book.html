@@ -10,10 +10,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        
         const firebaseConfig = {
             apiKey: "AIzaSyAPbpv2KRECXqg1z-vK_Z57ks9MH-ptBpU",
-            authDomain: "servera1-f8968.firebaseapp.com",
+            authDomain: "plazixx.github.io",
             projectId: "servera1-f8968",
             storageBucket: "servera1-f8968.firebasestorage.app",
             messagingSenderId: "450676625930",
@@ -63,7 +62,6 @@
     </div>
     <script>
         let notes = [];
-
         async function loadDataFromCloud() {
             if (!window.currentUserId) { notes = JSON.parse(localStorage.getItem('deadBookNotes')) || []; renderNotes(); return; }
             try {
@@ -73,7 +71,6 @@
             } catch (e) { console.error(e); notes = JSON.parse(localStorage.getItem('deadBookNotes')) || []; }
             renderNotes();
         }
-
         async function saveData() {
             if (!window.currentUserId) { localStorage.setItem('deadBookNotes', JSON.stringify(notes)); return; }
             try {
@@ -81,7 +78,6 @@
                 await setDoc(doc(window.firebaseDB, "users", window.currentUserId, "data", "deadBook"), { data: notes });
             } catch (e) { console.error(e); localStorage.setItem('deadBookNotes', JSON.stringify(notes)); }
         }
-
         function renderNotes() {
             const container = document.getElementById('notes-container'); container.innerHTML = '';
             const sortedNotes = [...notes].sort((a, b) => b.id - a.id);
@@ -93,10 +89,8 @@
             if (notes.length === 0) { container.innerHTML = '<p style="color:#555; font-style:italic; text-align:center; padding: 20px;">Мёртвая книга пуста. Пока что...</p>'; }
             saveData();
         }
-
         function addNote() { const title = document.getElementById('note-title').value.trim(); const desc = document.getElementById('note-desc').value.trim(); if (title === '' || desc === '') { return alert("Заполните название и описание!"); } const now = new Date(); const dateStr = now.toLocaleDateString('ru-RU'); const newNote = { id: Date.now(), title: title, desc: desc, date: dateStr }; notes.push(newNote); document.getElementById('note-title').value = ''; document.getElementById('note-desc').value = ''; renderNotes(); }
         function deleteNote(id) { if (confirm("Вы уверены, что хотите удалить эту запись из архива?")) { notes = notes.filter(note => note.id !== id); renderNotes(); } }
-
         if (window.currentUserId !== undefined) { loadDataFromCloud(); } else { setTimeout(loadDataFromCloud, 1000); }
     </script>
 </body>

@@ -10,10 +10,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        
         const firebaseConfig = {
             apiKey: "AIzaSyAPbpv2KRECXqg1z-vK_Z57ks9MH-ptBpU",
-            authDomain: "servera1-f8968.firebaseapp.com",
+            authDomain: "plazixx.github.io",
             projectId: "servera1-f8968",
             storageBucket: "servera1-f8968.firebasestorage.app",
             messagingSenderId: "450676625930",
@@ -45,7 +44,6 @@
     <script>
         let achievements = [];
         let currentImageBase64 = "";
-
         async function loadDataFromCloud() {
             if (!window.currentUserId) { achievements = JSON.parse(localStorage.getItem('myAchievements')) || []; renderAchievements(); return; }
             try {
@@ -55,7 +53,6 @@
             } catch (e) { console.error(e); achievements = JSON.parse(localStorage.getItem('myAchievements')) || []; }
             renderAchievements();
         }
-
         async function saveData() {
             if (!window.currentUserId) { localStorage.setItem('myAchievements', JSON.stringify(achievements)); return; }
             try {
@@ -63,7 +60,6 @@
                 await setDoc(doc(window.firebaseDB, "users", window.currentUserId, "data", "achievements"), { data: achievements });
             } catch (e) { console.error(e); localStorage.setItem('myAchievements', JSON.stringify(achievements)); }
         }
-
         document.getElementById('achieve-image').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -72,7 +68,6 @@
                 reader.readAsDataURL(file);
             }
         });
-
         function addAchievement() {
             const title = document.getElementById('achieve-title').value.trim();
             const desc = document.getElementById('achieve-desc').value.trim();
@@ -83,14 +78,12 @@
             document.getElementById('achieve-title').value = ''; document.getElementById('achieve-desc').value = ''; document.getElementById('achieve-image').value = ''; currentImageBase64 = "";
             renderAchievements();
         }
-
         function deleteAchievement(id) {
             if (confirm("Удалить это достижение из истории?")) {
                 achievements = achievements.filter(a => a.id !== id);
                 renderAchievements();
             }
         }
-
         function renderAchievements() {
             const grid = document.getElementById('achievements-grid'); grid.innerHTML = '';
             const sorted = [...achievements].sort((a, b) => b.id - a.id);
@@ -102,7 +95,6 @@
             });
             saveData();
         }
-
         if (window.currentUserId !== undefined) { loadDataFromCloud(); } else { setTimeout(loadDataFromCloud, 1000); }
     </script>
 </body>

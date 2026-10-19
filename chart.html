@@ -11,10 +11,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        
         const firebaseConfig = {
             apiKey: "AIzaSyAPbpv2KRECXqg1z-vK_Z57ks9MH-ptBpU",
-            authDomain: "servera1-f8968.firebaseapp.com",
+            authDomain: "plazixx.github.io",
             projectId: "servera1-f8968",
             storageBucket: "servera1-f8968.firebasestorage.app",
             messagingSenderId: "450676625930",
@@ -74,7 +73,6 @@
         let entries = [];
         let chartInstance = null;
         const today = new Date(); const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`; document.getElementById('entry-date').value = todayStr;
-
         async function loadDataFromCloud() {
             if (!window.currentUserId) { entries = JSON.parse(localStorage.getItem('dailyEntries')) || []; renderPage(); return; }
             try {
@@ -84,7 +82,6 @@
             } catch (e) { console.error(e); entries = JSON.parse(localStorage.getItem('dailyEntries')) || []; }
             renderPage();
         }
-
         async function saveData() {
             if (!window.currentUserId) { localStorage.setItem('dailyEntries', JSON.stringify(entries)); return; }
             try {
@@ -92,16 +89,13 @@
                 await setDoc(doc(window.firebaseDB, "users", window.currentUserId, "data", "chart"), { data: entries });
             } catch (e) { console.error(e); localStorage.setItem('dailyEntries', JSON.stringify(entries)); }
         }
-
         function renderPage() { renderTable(); renderChart(); }
-
         function renderTable() {
             const tbody = document.getElementById('historyBody'); tbody.innerHTML = '';
             const sorted = [...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
             sorted.forEach((entry) => { const conf = statusConfig[entry.status]; const tr = document.createElement('tr'); const d = new Date(entry.date); const dateStr = d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }); tr.innerHTML = `<td style="color: #fff;">${dateStr}</td><td style="color: ${conf.color}; font-weight: bold;">${conf.label}</td><td style="color: #aaa;">${entry.notes || '-'}</td><td><button class="btn-delete-row" onclick="deleteEntry('${entry.id}')">🗑</button></td>`; tbody.appendChild(tr); });
             if (entries.length === 0) { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#555; padding: 20px;">Пока нет записей.</td></tr>`; }
         }
-
         function renderChart() {
             const ctx = document.getElementById('progressChart').getContext('2d');
             const dates = []; for (let i = 13; i >= 0; i--) { let d = new Date(); d.setDate(d.getDate() - i); const yyyy = d.getFullYear(); const mm = String(d.getMonth() + 1).padStart(2, '0'); const dd = String(d.getDate()).padStart(2, '0'); dates.push(`${yyyy}-${mm}-${dd}`); }
@@ -111,10 +105,8 @@
             const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() || '#a3ff12';
             chartInstance = new Chart(ctx, { type: 'line', data: { labels: chartLabels, datasets: [{ label: 'Продуктивность', data: chartData, borderColor: themeColor, backgroundColor: 'rgba(255, 255, 255, 0.1)', borderWidth: 3, pointBackgroundColor: themeColor, pointBorderColor: '#000', pointRadius: 6, pointHoverRadius: 9, spanGaps: true, tension: 0.3, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { labels: { color: '#fff' } }, tooltip: { callbacks: { label: function(context) { const dateStr = dates[context.dataIndex]; const entry = entries.find(e => e.date === dateStr); if (entry) { return `Статус: ${statusConfig[entry.status].label} \nЗаметки: ${entry.notes || 'нет'}`; } return 'Нет записи'; } } } }, scales: { y: { beginAtZero: true, max: 5.5, ticks: { color: '#888', stepSize: 1, callback: function(value) { const labels = {1: 'Ничего', 2: '50/50', 3: 'Вкратце', 4: 'В потоке', 5: 'До конца'}; return labels[value] || ''; } }, grid: { color: '#222' } }, x: { ticks: { color: '#888' }, grid: { display: false } } } } });
         }
-
         function addEntry() { const date = document.getElementById('entry-date').value; const status = document.getElementById('entry-status').value; const notes = document.getElementById('entry-notes').value.trim(); if (!date) return alert("Выберите дату!"); const existingIndex = entries.findIndex(e => e.date === date); const newEntry = { id: Date.now().toString(), date, status, notes }; if (existingIndex !== -1) entries[existingIndex] = newEntry; else entries.push(newEntry); document.getElementById('entry-notes').value = ''; renderPage(); }
         function deleteEntry(id) { if (confirm("Удалить эту запись?")) { entries = entries.filter(e => e.id !== id); renderPage(); } }
-
         if (window.currentUserId !== undefined) { loadDataFromCloud(); } else { setTimeout(loadDataFromCloud, 1000); }
     </script>
 </body>

@@ -10,10 +10,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        
         const firebaseConfig = {
             apiKey: "AIzaSyAPbpv2KRECXqg1z-vK_Z57ks9MH-ptBpU",
-            authDomain: "servera1-f8968.firebaseapp.com",
+            authDomain: "plazixx.github.io",
             projectId: "servera1-f8968",
             storageBucket: "servera1-f8968.firebasestorage.app",
             messagingSenderId: "450676625930",
@@ -100,7 +99,6 @@
         const defaultPlans = [];
         let plans = defaultPlans;
         let currentEditId = null;
-
         async function loadDataFromCloud() {
             if (!window.currentUserId) { plans = JSON.parse(localStorage.getItem('globalPlansV2')) || defaultPlans; renderPlans(); return; }
             try {
@@ -110,7 +108,6 @@
             } catch (e) { console.error(e); plans = JSON.parse(localStorage.getItem('globalPlansV2')) || defaultPlans; }
             renderPlans();
         }
-
         async function saveData() {
             if (!window.currentUserId) { localStorage.setItem('globalPlansV2', JSON.stringify(plans)); return; }
             try {
@@ -118,7 +115,6 @@
                 await setDoc(doc(window.firebaseDB, "users", window.currentUserId, "data", "plans"), { data: plans });
             } catch (e) { console.error(e); localStorage.setItem('globalPlansV2', JSON.stringify(plans)); }
         }
-
         function parseDesc(plan) {
             const lines = plan.desc.split('\n'); let html = ''; let subIndex = 0;
             lines.forEach(line => {
@@ -132,7 +128,6 @@
             if (subIndex > 0) { html = `<p style="margin-bottom: 5px;">${lines[0].includes('-') ? '' : lines[0]}</p><ul class="subtask-list">${html}</ul>`; }
             return html;
         }
-
         function renderPlans() {
             const activeContainer = document.getElementById('active-plans'); const completedContainer = document.getElementById('completed-plans');
             activeContainer.innerHTML = ''; completedContainer.innerHTML = ''; let activeCount = 0, completedCount = 0;
@@ -160,7 +155,6 @@
             if (completedCount === 0) completedContainer.innerHTML = '<p style="color:#555; font-style:italic;">Пока нет завершенных целей.</p>';
             document.getElementById('stat-active').textContent = activeCount; document.getElementById('stat-completed').textContent = completedCount; saveData();
         }
-
         function addPlan() { const title = document.getElementById('add-title').value.trim(); const category = document.getElementById('add-category').value; const date = document.getElementById('add-date').value; const desc = document.getElementById('add-desc').value.trim(); if (title === '') return alert("Введите название!"); plans.unshift({ id: Date.now(), title, category, date, desc: desc || "Описание не добавлено.", subtasks: [], completed: false }); renderPlans(); document.getElementById('add-title').value = ''; document.getElementById('add-date').value = ''; document.getElementById('add-desc').value = ''; }
         function startEdit(id) { const plan = plans.find(p => p.id === id); if (!plan) return; currentEditId = id; document.getElementById('edit-title').value = plan.title; document.getElementById('edit-category').value = plan.category; document.getElementById('edit-date').value = plan.date || ''; document.getElementById('edit-desc').value = plan.desc; document.getElementById('add-form').classList.add('hidden'); document.getElementById('edit-form').classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
         function saveEdit() { const plan = plans.find(p => p.id === currentEditId); if (plan) { plan.title = document.getElementById('edit-title').value.trim(); plan.category = document.getElementById('edit-category').value; plan.date = document.getElementById('edit-date').value; plan.desc = document.getElementById('edit-desc').value.trim(); renderPlans(); } cancelEdit(); }
@@ -168,7 +162,6 @@
         function toggleSubtask(planId, subIndex) { const plan = plans.find(p => p.id === planId); if (plan) { if (!plan.subtasks) plan.subtasks = []; plan.subtasks[subIndex] = !plan.subtasks[subIndex]; renderPlans(); } }
         function completePlan(id) { const plan = plans.find(p => p.id === id); if (plan) { plan.completed = true; renderPlans(); } }
         function deletePlan(id) { if (confirm("Удалить этот план полностью?")) { plans = plans.filter(p => p.id !== id); renderPlans(); } }
-
         if (window.currentUserId !== undefined) { loadDataFromCloud(); } else { setTimeout(loadDataFromCloud, 1000); }
     </script>
 </body>

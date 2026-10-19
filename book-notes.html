@@ -10,10 +10,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        
         const firebaseConfig = {
             apiKey: "AIzaSyAPbpv2KRECXqg1z-vK_Z57ks9MH-ptBpU",
-            authDomain: "servera1-f8968.firebaseapp.com",
+            authDomain: "plazixx.github.io",
             projectId: "servera1-f8968",
             storageBucket: "servera1-f8968.firebasestorage.app",
             messagingSenderId: "450676625930",
@@ -97,7 +96,6 @@
     </div>
     <script>
         let bookData = { title: "Название книги...", cover: "", pagesRead: 0, pagesTotal: 300, chapters: [] };
-
         async function loadDataFromCloud() {
             if (!window.currentUserId) { bookData = JSON.parse(localStorage.getItem('bookTrackerData')) || bookData; initUI(); return; }
             try {
@@ -107,7 +105,6 @@
             } catch (e) { console.error(e); bookData = JSON.parse(localStorage.getItem('bookTrackerData')) || bookData; }
             initUI();
         }
-
         async function saveData() {
             if (!window.currentUserId) { localStorage.setItem('bookTrackerData', JSON.stringify(bookData)); return; }
             try {
@@ -115,7 +112,6 @@
                 await setDoc(doc(window.firebaseDB, "users", window.currentUserId, "data", "book"), { data: bookData });
             } catch (e) { console.error(e); localStorage.setItem('bookTrackerData', JSON.stringify(bookData)); }
         }
-
         function initUI() {
             document.getElementById('book-title').value = bookData.title; 
             document.getElementById('pages-total').textContent = bookData.pagesTotal; 
@@ -124,7 +120,6 @@
             if (bookData.cover) { const img = document.getElementById('cover-image'); img.src = bookData.cover; img.style.display = 'block'; document.getElementById('upload-text').style.display = 'none'; }
             updateProgress(); renderChapters();
         }
-
         function uploadCover(event) { const file = event.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = function(e) { const img = document.getElementById('cover-image'); img.src = e.target.result; img.style.display = 'block'; document.getElementById('upload-text').style.display = 'none'; bookData.cover = e.target.result; saveData(); }; reader.readAsDataURL(file); } }
         document.getElementById('book-title').addEventListener('input', function(e) { bookData.title = e.target.value; saveData(); });
         function updateTotalPages() { const newTotal = parseInt(document.getElementById('total-pages-input').value) || 300; bookData.pagesTotal = newTotal; document.getElementById('pages-total').textContent = newTotal; updateProgress(); saveData(); }
@@ -133,7 +128,6 @@
         function addChapter() { const title = document.getElementById('chapter-title').value.trim(); const notes = document.getElementById('chapter-notes').value.trim(); if (!title || !notes) return alert("Заполните название главы и заметки!"); const now = new Date(); const dateStr = now.toLocaleDateString('ru-RU'); const newChapter = { id: Date.now().toString(), title: title, notes: notes, date: dateStr }; bookData.chapters.push(newChapter); document.getElementById('chapter-title').value = ''; document.getElementById('chapter-notes').value = ''; renderChapters(); saveData(); }
         function deleteChapter(id) { if (confirm("Удалить эту запись?")) { bookData.chapters = bookData.chapters.filter(c => c.id !== id); renderChapters(); saveData(); } }
         function renderChapters() { const list = document.getElementById('chapters-list'); list.innerHTML = ''; const sorted = [...bookData.chapters].sort((a, b) => b.id - a.id); sorted.forEach(chapter => { const card = document.createElement('div'); card.className = 'chapter-card'; card.innerHTML = `<button class="btn-delete-chapter" onclick="deleteChapter('${chapter.id}')" title="Удалить">❌</button><h3 class="chapter-title">${chapter.title}</h3><span class="chapter-date">Добавлено: ${chapter.date}</span><div class="chapter-notes">${chapter.notes}</div>`; list.appendChild(card); }); }
-
         if (window.currentUserId !== undefined) { loadDataFromCloud(); } else { setTimeout(loadDataFromCloud, 1000); }
     </script>
 </body>

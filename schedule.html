@@ -10,10 +10,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        
         const firebaseConfig = {
             apiKey: "AIzaSyAPbpv2KRECXqg1z-vK_Z57ks9MH-ptBpU",
-            authDomain: "servera1-f8968.firebaseapp.com",
+            authDomain: "plazixx.github.io",
             projectId: "servera1-f8968",
             storageBucket: "servera1-f8968.firebasestorage.app",
             messagingSenderId: "450676625930",
@@ -105,7 +104,6 @@
         const defaultData = { "Понедельник": [], "Вторник": [], "Среда": [], "Четверг": [], "Пятница": [], "Суббота": [], "Воскресенье": [] };
         let scheduleData = defaultData;
         const dayBadges = { "Суббота": { text: "СОКРАЩЕННЫЙ ДЕНЬ", class: "short" }, "Воскресенье": { text: "ВЫХОДНОЙ", class: "weekend" } };
-
         async function loadDataFromCloud() {
             if (!window.currentUserId) { scheduleData = JSON.parse(localStorage.getItem('scheduleData')) || defaultData; renderSchedule(); return; }
             try {
@@ -115,7 +113,6 @@
             } catch (e) { console.error(e); scheduleData = JSON.parse(localStorage.getItem('scheduleData')) || defaultData; }
             renderSchedule();
         }
-
         async function saveData() {
             if (!window.currentUserId) { localStorage.setItem('scheduleData', JSON.stringify(scheduleData)); return; }
             try {
@@ -123,7 +120,6 @@
                 await setDoc(doc(window.firebaseDB, "users", window.currentUserId, "data", "schedule"), { data: scheduleData });
             } catch (e) { console.error(e); localStorage.setItem('scheduleData', JSON.stringify(scheduleData)); }
         }
-
         function renderSchedule() {
             const board = document.getElementById('schedule-board'); board.innerHTML = ''; let totalTasks = 0, doneTasks = 0, dayIndex = 0;
             for (const [day, tasks] of Object.entries(scheduleData)) {
@@ -142,7 +138,6 @@
             }
             updateUI(totalTasks, doneTasks); saveData();
         }
-
         function updateUI(total, done) {
             const fill = document.getElementById('progress-fill'), text = document.getElementById('progress-text'), circleWrapper = document.getElementById('circle-wrapper'), chartPercent = document.getElementById('chart-percent'), chartCount = document.getElementById('chart-count');
             let percent = total === 0 ? 0 : Math.round((done / total) * 100);
@@ -150,13 +145,11 @@
             const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() || '#ffcc00';
             circleWrapper.style.background = `conic-gradient(${themeColor} ${percent}%, #222 ${percent}%)`;
         }
-
         function addTask() { const day = document.getElementById('day-select').value; const input = document.getElementById('task-input'); const taskText = input.value.trim(); if (taskText === '') return; scheduleData[day].push({ text: taskText, done: false }); input.value = ''; renderSchedule(); }
         function deleteTask(day, index) { scheduleData[day].splice(index, 1); renderSchedule(); }
         function editTask(day, index) { const newTask = prompt("Измените задачу:", scheduleData[day][index].text); if (newTask !== null && newTask.trim() !== '') { scheduleData[day][index].text = newTask.trim(); renderSchedule(); } }
         function toggleTask(day, index) { scheduleData[day][index].done = !scheduleData[day][index].done; renderSchedule(); }
         function clearAll() { if (confirm("Удалить ВСЕ задачи?")) { for (let day in scheduleData) scheduleData[day] = []; renderSchedule(); } }
-        
         if (window.currentUserId !== undefined) { loadDataFromCloud(); } else { setTimeout(loadDataFromCloud, 1000); }
     </script>
 </body>
