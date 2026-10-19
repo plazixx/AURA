@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой Личный Хаб</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="season.js"></script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAPbpv2KRECXqg1z-vK_Z57ks9MH-ptBpU",
+            authDomain: "servera1-f8968.firebaseapp.com",
+            projectId: "servera1-f8968",
+            storageBucket: "servera1-f8968.firebasestorage.app",
+            messagingSenderId: "450676625930",
+            appId: "1:450676625930:web:2ec0e25d3e54e24cd845f3",
+            measurementId: "G-0781Q3WNR2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        window.firebaseAuth = auth;
+        window.firebaseDB = db;
+
+        window.loginWithEmail = () => {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            if (!email || !pass) return alert("Введите Email и Пароль!");
+            signInWithEmailAndPassword(auth, email, pass).catch(e => alert("Ошибка входа: " + e.message));
+        };
+
+        window.registerWithEmail = () => {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            if (!email || !pass) return alert("Введите Email и Пароль!");
+            createUserWithEmailAndPassword(auth, email, pass).catch(e => alert("Ошибка регистрации: " + e.message));
+        };
+
+        window.logout = () => signOut(auth);
+
+        onAuthStateChanged(auth, (user) => {
+            const authStatus = document.getElementById('auth-status');
+            const authForm = document.getElementById('auth-form');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            if (authStatus) {
+                if (user) {
+                    authStatus.textContent = `Вы вошли как: ${user.email}`;
+                    authStatus.style.color = '#a3ff12';
+                    if (authForm) authForm.style.display = 'none';
+                    if (logoutBtn) logoutBtn.style.display = 'inline-block';
+                    window.currentUserId = user.uid;
+                } else {
+                    authStatus.textContent = 'Войдите, чтобы сохранять данные в облаке.';
+                    authStatus.style.color = '#ff3333';
+                    if (authForm) authForm.style.display = 'block';
+                    if (logoutBtn) logoutBtn.style.display = 'none';
+                    window.currentUserId = null;
+                }
+            }
+        });
+    </script>
+
+    <style>
+        .season-widget { position: fixed; top: 15px; right: 20px; background: rgba(20, 20, 20, 0.95); border: 1px solid var(--theme-color, #a3ff12); border-radius: 10px; padding: 12px 20px; text-align: center; box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.05); backdrop-filter: blur(5px); z-index: 1000; min-width: 180px; }
+        .season-widget .season-title { color: #fff; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; text-shadow: 0 0 5px #fff; }
+        .season-widget .season-name { color: var(--theme-color, #a3ff12); font-family: 'Courier New', monospace; font-size: 1.1rem; font-weight: bold; text-shadow: 0 0 10px var(--theme-color, #a3ff12); margin-bottom: 2px; display: block; }
+        .season-widget .season-subtitle { font-size: 0.7rem; color: #aaa; font-family: 'Courier New', monospace; }
+        .season-widget .countdown-digits { color: #fff; font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: bold; display: flex; justify-content: center; margin-top: 2px; }
+        .season-widget .countdown-digits small { font-size: 0.6rem; color: #888; font-weight: normal; text-shadow: none; margin-left: 3px; }
+        .top-bar { padding-right: 220px; }
+        @media (max-width: 900px) { .season-widget { position: relative; top: 0; right: 0; width: 100%; margin-bottom: 20px; } .top-bar { padding-right: 0; } }
+        .auth-box { text-align: center; margin-bottom: 20px; padding: 15px; background: #141414; border-radius: 10px; border: 1px solid #333; }
+        .auth-box input { padding: 10px; margin: 5px; background: #050505; border: 1px solid #333; color: #fff; border-radius: 6px; width: 180px; outline: none; }
+        .auth-box input:focus { border-color: var(--theme-color, #a3ff12); }
+    </style>
+</head>
+<body>
+    <div class="neon-tree"><div class="star">★</div><div class="tree-triangle t1"></div><div class="tree-triangle t2"></div><div class="tree-triangle t3"></div><div class="tree-trunk"></div></div>
+    <div class="background-animation"><div class="shape triangle"></div><div class="shape triangle-2"></div><div class="shape square"></div><div class="shape line"></div><div class="shape circle"></div></div>
+    
+    <div class="container">
+        <header class="top-bar">
+            <div class="logo">SYSTEM // HUB</div>
+            <div class="date" id="currentDate">Загрузка...</div>
+        </header>
+
+        <div class="main-layout">
+            <div class="assistant-panel">
+                <div class="assistant-figure">
+                    <svg viewBox="0 0 100 100" class="figure-svg">
+                        <path d="M50 10 C30 10 20 30 20 50 L20 90 L80 90 L80 50 C80 30 70 10 50 10 Z" fill="#0a0a0a" stroke="#a3ff12" stroke-width="2"/>
+                        <circle cx="40" cy="40" r="4" fill="#a3ff12" />
+                        <circle cx="60" cy="40" r="4" fill="#a3ff12" />
+                    </svg>
+                </div>
+                <div class="assistant-text" id="assistantText">&gt; Инициализация...<br>&gt; Наведи на модуль.</div>
+            </div>
+
+            <div class="menu-section">
+                <div class="auth-box">
+                    <p id="auth-status" style="color: #ff3333; margin-bottom: 10px; font-family: 'Courier New', monospace;">Загрузка...</p>
+                    <div id="auth-form">
+                        <input type="email" id="auth-email" placeholder="Email">
+                        <input type="password" id="auth-pass" placeholder="Пароль">
+                        <br>
+                        <button onclick="window.loginWithEmail()" style="background: #a3ff12; color: #000; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px;">Войти</button>
+                        <button onclick="window.registerWithEmail()" style="background: transparent; color: #a3ff12; border: 1px solid #a3ff12; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px;">Регистрация</button>
+                    </div>
+                    <button id="logout-btn" onclick="window.logout()" style="display: none; background: transparent; color: #ff3333; border: 1px solid #ff3333; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">Выйти</button>
+                </div>
+
+                <div class="main-header">
+                    <h1 class="neon-text">Добро пожаловать в систему</h1>
+                    <p>Выберите нужный раздел для работы</p>
+                </div>
+
+                <main class="menu-grid">
+                    <a href="schedule.html" class="menu-btn" data-info="&gt; Загрузка модуля 'Расписание'...<br>&gt; Анализ дедлайнов... OK."><span class="btn-icon">📅</span><div class="btn-content"><span class="btn-text">Еженедельное расписание</span><span class="btn-desc">Планирование задач</span></div></a>
+                    <a href="global-plan.html" class="menu-btn" data-info="&gt; Доступ к глобальному плану...<br>&gt; Синхронизация целей... OK."><span class="btn-icon">🌍</span><div class="btn-content"><span class="btn-text">Глобальный план</span><span class="btn-desc">Дорожная карта</span></div></a>
+                    <a href="book-notes.html" class="menu-btn" data-info="&gt; Открытие базы знаний...<br>&gt; Загрузка конспектов... OK."><span class="btn-icon">📝</span><div class="btn-content"><span class="btn-text">Конспект по книге</span><span class="btn-desc">Сохраненные знания</span></div></a>
+                    <a href="dead-book.html" class="menu-btn" data-info="&gt; ВНИМАНИЕ! Доступ к архиву...<br>&gt; Найдены заброшенные проекты."><span class="btn-icon">💀</span><div class="btn-content"><span class="btn-text">Мёртвая книга</span><span class="btn-desc">Архив идей</span></div></a>
+                    <a href="chart.html" class="menu-btn" data-info="&gt; Построение графика...<br>&gt; Загрузка данных... OK."><span class="btn-icon">📊</span><div class="btn-content"><span class="btn-text">График дня</span><span class="btn-desc">Статистика прогресса</span></div></a>
+                    <a href="achievements.html" class="menu-btn" data-info="&gt; Загрузка архива побед...<br>&gt; Синхронизация достижений... OK."><span class="btn-icon">🏆</span><div class="btn-content"><span class="btn-text">Мои достижения</span><span class="btn-desc">Личные победы</span></div></a>
+                </main>
+            </div>
+        </div>
+
+        <footer class="status-bar">
+            <span class="status-dot"></span>
+            <span>Система онлайн. Все модули работают в штатном режиме.</span>
+        </footer>
+    </div>
+
+    <div class="season-widget">
+        <div class="season-title">Сейчас на дворе</div>
+        <span class="season-name" id="current-season-name">Загрузка...</span>
+        <div class="season-subtitle" id="next-season-text">До следующего сезона</div>
+        <div class="countdown-digits" id="season-countdown"><span>00<small>дней</small></span></div>
+    </div>
+
+    <script>
+        function updateSeasonWidget() {
+            const now = new Date(); const month = now.getMonth() + 1; const day = now.getDate(); const year = now.getFullYear();
+            let currentSeason = ""; let nextSeason = ""; let nextDate = null;
+            if (month >= 9 && month <= 11) { currentSeason = "Осень 🎃"; nextSeason = "Зиму ❄️"; nextDate = new Date(year, 11, 1); } 
+            else if (month === 12 || month === 1 || (month === 2 && day <= 28)) { currentSeason = "Зима ❄️"; nextSeason = "Весну 🌸"; nextDate = new Date(year, 2, 1); if (month === 1 || (month === 2 && day <= 28)) nextDate.setFullYear(year); } 
+            else if (month >= 3 && month <= 5) { currentSeason = "Весна 🌸"; nextSeason = "Лето ☀️"; nextDate = new Date(year, 5, 1); } 
+            else if (month >= 6 && month <= 8) { currentSeason = "Лето ☀️"; nextSeason = "Осень 🎃"; nextDate = new Date(year, 8, 1); }
+            if (currentSeason.includes("Зима") && nextDate < now) nextDate.setFullYear(year + 1);
+            document.getElementById('current-season-name').textContent = currentSeason;
+            document.getElementById('next-season-text').textContent = `До ${nextSeason} осталось:`;
+            const diffTime = Math.abs(nextDate - now); const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            document.getElementById('season-countdown').innerHTML = `<span>${diffDays}<small>дней</small></span>`;
+        }
+        updateSeasonWidget(); setInterval(updateSeasonWidget, 1000 * 60 * 60);
+
+        function updateDate() { const now = new Date(); const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }; document.getElementById('currentDate').textContent = now.toLocaleDateString('ru-RU', options); }
+        setInterval(updateDate, 1000); updateDate();
+
+        const assistantText = document.getElementById('assistantText'); const buttons = document.querySelectorAll('.menu-btn'); const defaultText = "&gt; Ожидание команды...<br>&gt; Наведи на модуль.";
+        buttons.forEach(btn => { btn.addEventListener('mouseenter', () => { assistantText.innerHTML = btn.getAttribute('data-info'); assistantText.style.animation = 'none'; assistantText.offsetHeight; assistantText.style.animation = 'fadeIn 0.3s ease-out'; }); btn.addEventListener('mouseleave', () => { assistantText.innerHTML = defaultText; }); });
+    </script>
+</body>
+</html>

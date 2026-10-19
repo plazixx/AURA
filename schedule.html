@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Еженедельное расписание</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="season.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyAPbpv2KRECXqg1z-vK_Z57ks9MH-ptBpU",
+            authDomain: "servera1-f8968.firebaseapp.com",
+            projectId: "servera1-f8968",
+            storageBucket: "servera1-f8968.firebasestorage.app",
+            messagingSenderId: "450676625930",
+            appId: "1:450676625930:web:2ec0e25d3e54e24cd845f3",
+            measurementId: "G-0781Q3WNR2"
+        };
+        const app = initializeApp(firebaseConfig);
+        window.firebaseAuth = getAuth(app);
+        window.firebaseDB = getFirestore(app);
+    </script>
+    <style>
+        .schedule-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .dashboard { display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap; }
+        .chart-container { background: #141414; border: 1px solid #333; border-radius: 10px; padding: 20px; display: flex; align-items: center; gap: 20px; flex: 0 0 300px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .circular-chart-wrapper { position: relative; width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(var(--theme-color, #ffcc00) 0%, #222 0%); display: flex; justify-content: center; align-items: center; transition: background 0.5s ease; }
+        .circular-chart-inner { width: 64px; height: 64px; background: #141414; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+        .chart-text { font-size: 16px; color: #fff; font-weight: bold; }
+        .chart-info h3 { color: #fff; margin-bottom: 5px; }
+        .chart-info p { color: #888; font-size: 0.9rem; }
+        .progress-container { background: #141414; border: 1px solid #333; border-radius: 10px; padding: 20px; flex: 1; min-width: 250px; display: flex; flex-direction: column; justify-content: center; }
+        .progress-info { display: flex; justify-content: space-between; margin-bottom: 10px; font-family: 'Courier New', monospace; color: #aaa; }
+        .progress-bar-bg { width: 100%; height: 12px; background: #050505; border-radius: 6px; overflow: hidden; border: 1px solid #222; }
+        .progress-bar-fill { height: 100%; width: 0%; background: var(--theme-color, #ffcc00); box-shadow: 0 0 10px var(--theme-color, #ffcc00); transition: width 0.4s ease-out; }
+        .add-task-form { display: flex; gap: 10px; margin-bottom: 30px; background: #141414; padding: 20px; border-radius: 10px; border: 1px solid #333; flex-wrap: wrap; }
+        .add-task-form input, .add-task-form select { padding: 12px; background: #050505; border: 1px solid #333; color: #fff; border-radius: 6px; font-size: 1rem; outline: none; transition: border 0.3s; }
+        .add-task-form input:focus, .add-task-form select:focus { border-color: var(--theme-color, #a3ff12); }
+        .add-task-form input[type="text"] { flex: 1; min-width: 200px; }
+        .add-task-form button { background: var(--theme-color, #a3ff12); color: #000; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .add-task-form button:hover { background: #fff; box-shadow: 0 0 15px var(--theme-color, #a3ff12); }
+        .btn-clear { background: transparent; border: 1px solid #ff3333; color: #ff3333; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .btn-clear:hover { background: #ff3333; color: #000; box-shadow: 0 0 15px rgba(255, 51, 51, 0.5); }
+        .day-block { margin-bottom: 30px; }
+        .day-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #333; padding-bottom: 8px; margin-bottom: 15px; }
+        .day-title { color: var(--theme-color, #a3ff12); font-size: 1.5rem; margin: 0; text-shadow: 0 0 10px var(--theme-color, #a3ff12); }
+        .day-badge { font-family: 'Courier New', monospace; font-size: 0.8rem; padding: 4px 10px; border-radius: 4px; border: 1px solid #555; color: #888; }
+        .day-badge.weekend { border-color: #ff3333; color: #ff3333; }
+        .day-badge.short { border-color: #ffcc00; color: #ffcc00; }
+        .task-list { list-style: none; padding: 0; }
+        .task-item { display: flex; align-items: center; background: rgba(255, 255, 255, 0.03); padding: 12px 15px; margin-bottom: 10px; border-radius: 6px; border-left: 3px solid var(--theme-color, #a3ff12); transition: all 0.3s; }
+        .task-item.done { opacity: 0.4; border-left-color: #555; }
+        .task-item.done .task-text { text-decoration: line-through; color: #777; }
+        .task-checkbox { appearance: none; width: 20px; height: 20px; border: 2px solid var(--theme-color, #a3ff12); border-radius: 4px; cursor: pointer; margin-right: 15px; position: relative; transition: all 0.2s; }
+        .task-checkbox:checked { background: var(--theme-color, #a3ff12); }
+        .task-checkbox:checked::after { content: '✔'; position: absolute; color: #000; font-size: 14px; font-weight: bold; top: -2px; left: 3px; }
+        .task-text { flex: 1; color: #d4d4d4; transition: color 0.3s; }
+        .task-actions { display: flex; gap: 10px; }
+        .task-actions button { background: none; border: none; cursor: pointer; font-size: 1.2rem; transition: transform 0.2s; }
+        .task-actions button:hover { transform: scale(1.2); }
+        .btn-edit { color: #ffcc00; } .btn-delete { color: #ff3333; }
+    </style>
+</head>
+<body>
+    <div class="neon-tree"><div class="star">★</div><div class="tree-triangle t1"></div><div class="tree-triangle t2"></div><div class="tree-triangle t3"></div><div class="tree-trunk"></div></div>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Вернуться на главную</a>
+        <div class="schedule-header">
+            <header>
+                <h1 class="neon-text">📅 Еженедельное расписание</h1>
+                <p style="color:#888; margin-top:5px;">Управляй своим временем. Сброс каждую неделю.</p>
+            </header>
+            <button class="btn-clear" onclick="clearAll()">Очистить всё 🗑️</button>
+        </div>
+        <div class="dashboard">
+            <div class="chart-container">
+                <div class="circular-chart-wrapper" id="circle-wrapper">
+                    <div class="circular-chart-inner"><span class="chart-text" id="chart-percent">0%</span></div>
+                </div>
+                <div class="chart-info">
+                    <h3>Выполнено</h3>
+                    <p id="chart-count">0 из 0 задач</p>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-info"><span>ОБЩИЙ ПРОГРЕСС</span><span id="progress-text">0 / 0</span></div>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+            </div>
+        </div>
+        <div class="add-task-form">
+            <select id="day-select"><option value="Понедельник">Понедельник</option><option value="Вторник">Вторник</option><option value="Среда">Среда</option><option value="Четверг">Четверг</option><option value="Пятница">Пятница</option><option value="Суббота">Суббота</option><option value="Воскресенье">Воскресенье</option></select>
+            <input type="text" id="task-input" placeholder="Что нужно сделать?" required>
+            <button onclick="addTask()">Добавить</button>
+        </div>
+        <div id="schedule-board"></div>
+    </div>
+    <script>
+        const getWeekNumber = (d) => { d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7)); var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1)); var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7); return d.getUTCFullYear() + '-' + weekNo; };
+        const currentWeek = getWeekNumber(new Date()); const savedWeek = localStorage.getItem('scheduleWeek');
+        if (savedWeek !== currentWeek) { localStorage.removeItem('scheduleData'); localStorage.setItem('scheduleWeek', currentWeek); }
+        const defaultData = { "Понедельник": [], "Вторник": [], "Среда": [], "Четверг": [], "Пятница": [], "Суббота": [], "Воскресенье": [] };
+        let scheduleData = defaultData;
+        const dayBadges = { "Суббота": { text: "СОКРАЩЕННЫЙ ДЕНЬ", class: "short" }, "Воскресенье": { text: "ВЫХОДНОЙ", class: "weekend" } };
+
+        async function loadDataFromCloud() {
+            if (!window.currentUserId) { scheduleData = JSON.parse(localStorage.getItem('scheduleData')) || defaultData; renderSchedule(); return; }
+            try {
+                const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                const docSnap = await getDoc(doc(window.firebaseDB, "users", window.currentUserId, "data", "schedule"));
+                if (docSnap.exists()) { scheduleData = docSnap.data().data; }
+            } catch (e) { console.error(e); scheduleData = JSON.parse(localStorage.getItem('scheduleData')) || defaultData; }
+            renderSchedule();
+        }
+
+        async function saveData() {
+            if (!window.currentUserId) { localStorage.setItem('scheduleData', JSON.stringify(scheduleData)); return; }
+            try {
+                const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                await setDoc(doc(window.firebaseDB, "users", window.currentUserId, "data", "schedule"), { data: scheduleData });
+            } catch (e) { console.error(e); localStorage.setItem('scheduleData', JSON.stringify(scheduleData)); }
+        }
+
+        function renderSchedule() {
+            const board = document.getElementById('schedule-board'); board.innerHTML = ''; let totalTasks = 0, doneTasks = 0, dayIndex = 0;
+            for (const [day, tasks] of Object.entries(scheduleData)) {
+                const dayBlock = document.createElement('div'); dayBlock.className = 'day-block'; dayBlock.style.animation = `slideUp 0.5s ease-out ${dayIndex * 0.1}s backwards`; dayIndex++;
+                const badge = dayBadges[day] ? `<span class="day-badge ${dayBadges[day].class}">${dayBadges[day].text}</span>` : '';
+                let tasksHTML = '';
+                if (tasks.length === 0) { tasksHTML = `<p style="color: #555; font-style: italic;">Нет задач</p>`; } 
+                else {
+                    tasks.forEach((task, index) => {
+                        totalTasks++; if (task.done) doneTasks++;
+                        tasksHTML += `<li class="task-item ${task.done ? 'done' : ''}"><input type="checkbox" class="task-checkbox" ${task.done ? 'checked' : ''} onchange="toggleTask('${day}', ${index})"><span class="task-text">${task.text}</span><div class="task-actions"><button class="btn-edit" onclick="editTask('${day}', ${index})">✏️</button><button class="btn-delete" onclick="deleteTask('${day}', ${index})">❌</button></div></li>`;
+                    });
+                }
+                dayBlock.innerHTML = `<div class="day-header"><h2 class="day-title">${day}</h2>${badge}</div><ul class="task-list">${tasksHTML}</ul>`;
+                board.appendChild(dayBlock);
+            }
+            updateUI(totalTasks, doneTasks); saveData();
+        }
+
+        function updateUI(total, done) {
+            const fill = document.getElementById('progress-fill'), text = document.getElementById('progress-text'), circleWrapper = document.getElementById('circle-wrapper'), chartPercent = document.getElementById('chart-percent'), chartCount = document.getElementById('chart-count');
+            let percent = total === 0 ? 0 : Math.round((done / total) * 100);
+            text.textContent = `${done} / ${total}`; chartCount.textContent = `${done} из ${total} задач`; chartPercent.textContent = `${percent}%`; fill.style.width = `${percent}%`;
+            const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() || '#ffcc00';
+            circleWrapper.style.background = `conic-gradient(${themeColor} ${percent}%, #222 ${percent}%)`;
+        }
+
+        function addTask() { const day = document.getElementById('day-select').value; const input = document.getElementById('task-input'); const taskText = input.value.trim(); if (taskText === '') return; scheduleData[day].push({ text: taskText, done: false }); input.value = ''; renderSchedule(); }
+        function deleteTask(day, index) { scheduleData[day].splice(index, 1); renderSchedule(); }
+        function editTask(day, index) { const newTask = prompt("Измените задачу:", scheduleData[day][index].text); if (newTask !== null && newTask.trim() !== '') { scheduleData[day][index].text = newTask.trim(); renderSchedule(); } }
+        function toggleTask(day, index) { scheduleData[day][index].done = !scheduleData[day][index].done; renderSchedule(); }
+        function clearAll() { if (confirm("Удалить ВСЕ задачи?")) { for (let day in scheduleData) scheduleData[day] = []; renderSchedule(); } }
+        
+        if (window.currentUserId !== undefined) { loadDataFromCloud(); } else { setTimeout(loadDataFromCloud, 1000); }
+    </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Книга миров</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="season.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyAPbpv2KRECXqg1z-vK_Z57ks9MH-ptBpU",
+            authDomain: "servera1-f8968.firebaseapp.com",
+            projectId: "servera1-f8968",
+            storageBucket: "servera1-f8968.firebasestorage.app",
+            messagingSenderId: "450676625930",
+            appId: "1:450676625930:web:2ec0e25d3e54e24cd845f3",
+            measurementId: "G-0781Q3WNR2"
+        };
+        const app = initializeApp(firebaseConfig);
+        window.firebaseAuth = getAuth(app);
+        window.firebaseDB = getFirestore(app);
+    </script>
+    <style>
+        .book-header { display: flex; gap: 30px; background: #141414; border: 1px solid #333; border-radius: 12px; padding: 30px; margin-bottom: 30px; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); flex-wrap: wrap; }
+        .book-cover-container { width: 200px; height: 300px; background: #050505; border: 2px dashed #444; border-radius: 8px; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: all 0.3s; }
+        .book-cover-container:hover { border-color: var(--theme-color, #a3ff12); }
+        .book-cover-container img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .upload-text { color: #666; text-align: center; font-size: 0.9rem; padding: 10px; }
+        .book-info { flex: 1; min-width: 300px; }
+        .book-info h1 { color: var(--theme-color, #a3ff12); margin-top: 0; font-size: 2.5rem; text-shadow: 0 0 10px var(--theme-color, #a3ff12); }
+        .book-info input[type="text"] { background: transparent; border: none; border-bottom: 1px solid #444; color: #fff; font-size: 2rem; font-weight: bold; width: 100%; margin-bottom: 15px; outline: none; }
+        .book-info input[type="text"]:focus { border-bottom-color: var(--theme-color, #a3ff12); }
+        .reading-progress { margin-top: 20px; }
+        .progress-stats { display: flex; justify-content: space-between; margin-bottom: 10px; color: #aaa; font-family: 'Courier New', monospace; }
+        .progress-bar-bg { width: 100%; height: 15px; background: #050505; border-radius: 8px; overflow: hidden; border: 1px solid #222; margin-bottom: 15px; }
+        .progress-bar-fill { height: 100%; width: 0%; background: var(--theme-color, #a3ff12); box-shadow: 0 0 15px var(--theme-color, #a3ff12); transition: width 0.5s ease; }
+        .add-pages-form { display: flex; gap: 10px; margin-top: 15px; }
+        .add-pages-form input { padding: 10px; background: #050505; border: 1px solid #333; color: #fff; border-radius: 6px; outline: none; width: 100px; }
+        .add-pages-form button { background: var(--theme-color, #a3ff12); color: #000; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .add-pages-form button:hover { background: #fff; box-shadow: 0 0 15px var(--theme-color, #a3ff12); }
+        .chapters-section { margin-top: 40px; }
+        .chapters-section h2 { color: #fff; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        .add-chapter-form { display: flex; flex-direction: column; gap: 10px; background: #141414; border: 1px solid #333; border-radius: 10px; padding: 20px; margin-bottom: 30px; }
+        .add-chapter-form input, .add-chapter-form textarea { padding: 12px; background: #050505; border: 1px solid #333; color: #fff; border-radius: 6px; font-family: inherit; outline: none; }
+        .add-chapter-form textarea { resize: vertical; min-height: 80px; }
+        .add-chapter-form input:focus, .add-chapter-form textarea:focus { border-color: var(--theme-color, #a3ff12); }
+        .add-chapter-form button { background: var(--theme-color, #a3ff12); color: #000; border: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; align-self: flex-start; }
+        .add-chapter-form button:hover { background: #fff; box-shadow: 0 0 15px var(--theme-color, #a3ff12); }
+        .chapter-card { background: #111; border-left: 5px solid var(--theme-color, #a3ff12); border-radius: 8px; padding: 20px; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: slideUp 0.4s ease-out; position: relative; }
+        .chapter-title { color: var(--theme-color, #a3ff12); margin-top: 0; margin-bottom: 10px; font-size: 1.2rem; }
+        .chapter-notes { color: #bbb; line-height: 1.6; white-space: pre-wrap; font-size: 0.95rem; }
+        .chapter-date { font-size: 0.8rem; color: #666; font-family: 'Courier New', monospace; margin-bottom: 10px; display: block; }
+        .btn-delete-chapter { position: absolute; top: 20px; right: 20px; background: none; border: none; color: #ff3333; cursor: pointer; font-size: 1.2rem; transition: 0.2s; }
+        .btn-delete-chapter:hover { transform: scale(1.2); }
+        @media (max-width: 768px) { .book-header { flex-direction: column; text-align: center; } .book-cover-container { margin: 0 auto; } }
+    </style>
+</head>
+<body>
+    <div class="neon-tree"><div class="star">★</div><div class="tree-triangle t1"></div><div class="tree-triangle t2"></div><div class="tree-triangle t3"></div><div class="tree-trunk"></div></div>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Вернуться на главную</a>
+        <header><h1 class="neon-text">📖 Книга миров</h1><p style="color:#888; margin-top:5px; margin-bottom: 30px;">Ваш личный дневник чтения и конспектов.</p></header>
+        <div class="book-header">
+            <div class="book-cover-container" id="cover-container" onclick="document.getElementById('cover-upload').click()">
+                <img id="cover-image" src="" alt="Обложка">
+                <div class="upload-text" id="upload-text">📷<br>Нажмите, чтобы<br>загрузить обложку</div>
+                <input type="file" id="cover-upload" accept="image/*" style="display: none;" onchange="uploadCover(event)">
+            </div>
+            <div class="book-info">
+                <input type="text" id="book-title" value="Название книги..." placeholder="Введите название книги...">
+                <div class="reading-progress">
+                    <div class="progress-stats"><span>ПРОЧИТАНО: <span id="pages-read">0</span> стр.</span><span>ВСЕГО: <span id="pages-total">300</span> стр.</span><span id="progress-percent">0%</span></div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+                    <div class="add-pages-form">
+                        <input type="number" id="pages-input" placeholder="Стр." min="1">
+                        <button onclick="addPages()">+ Добавить страницы</button>
+                        <span style="color: #666; margin: 0 10px;">|</span>
+                        <span style="color: #aaa; font-size: 0.9rem; align-self: center;">Всего в книге:</span>
+                        <input type="number" id="total-pages-input" value="300" min="1" onchange="updateTotalPages()">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="chapters-section">
+            <h2>📝 Заметки по главам</h2>
+            <div class="add-chapter-form">
+                <input type="text" id="chapter-title" placeholder="Название главы (например: Глава 1. Введение)">
+                <textarea id="chapter-notes" placeholder="Что вы узнали из этой главы? Какие главные мысли?"></textarea>
+                <button onclick="addChapter()">Добавить главу</button>
+            </div>
+            <div id="chapters-list"></div>
+        </div>
+    </div>
+    <script>
+        let bookData = { title: "Название книги...", cover: "", pagesRead: 0, pagesTotal: 300, chapters: [] };
+
+        async function loadDataFromCloud() {
+            if (!window.currentUserId) { bookData = JSON.parse(localStorage.getItem('bookTrackerData')) || bookData; initUI(); return; }
+            try {
+                const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                const docSnap = await getDoc(doc(window.firebaseDB, "users", window.currentUserId, "data", "book"));
+                if (docSnap.exists()) { bookData = docSnap.data().data; }
+            } catch (e) { console.error(e); bookData = JSON.parse(localStorage.getItem('bookTrackerData')) || bookData; }
+            initUI();
+        }
+
+        async function saveData() {
+            if (!window.currentUserId) { localStorage.setItem('bookTrackerData', JSON.stringify(bookData)); return; }
+            try {
+                const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                await setDoc(doc(window.firebaseDB, "users", window.currentUserId, "data", "book"), { data: bookData });
+            } catch (e) { console.error(e); localStorage.setItem('bookTrackerData', JSON.stringify(bookData)); }
+        }
+
+        function initUI() {
+            document.getElementById('book-title').value = bookData.title; 
+            document.getElementById('pages-total').textContent = bookData.pagesTotal; 
+            document.getElementById('total-pages-input').value = bookData.pagesTotal; 
+            document.getElementById('pages-read').textContent = bookData.pagesRead;
+            if (bookData.cover) { const img = document.getElementById('cover-image'); img.src = bookData.cover; img.style.display = 'block'; document.getElementById('upload-text').style.display = 'none'; }
+            updateProgress(); renderChapters();
+        }
+
+        function uploadCover(event) { const file = event.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = function(e) { const img = document.getElementById('cover-image'); img.src = e.target.result; img.style.display = 'block'; document.getElementById('upload-text').style.display = 'none'; bookData.cover = e.target.result; saveData(); }; reader.readAsDataURL(file); } }
+        document.getElementById('book-title').addEventListener('input', function(e) { bookData.title = e.target.value; saveData(); });
+        function updateTotalPages() { const newTotal = parseInt(document.getElementById('total-pages-input').value) || 300; bookData.pagesTotal = newTotal; document.getElementById('pages-total').textContent = newTotal; updateProgress(); saveData(); }
+        function addPages() { const input = document.getElementById('pages-input'); const pages = parseInt(input.value); if (!pages || pages <= 0) return alert("Введите количество прочитанных страниц!"); if (bookData.pagesRead + pages > bookData.pagesTotal) { bookData.pagesRead = bookData.pagesTotal; } else { bookData.pagesRead += pages; } input.value = ''; document.getElementById('pages-read').textContent = bookData.pagesRead; updateProgress(); saveData(); }
+        function updateProgress() { const percent = Math.round((bookData.pagesRead / bookData.pagesTotal) * 100) || 0; document.getElementById('progress-percent').textContent = `${percent}%`; document.getElementById('progress-fill').style.width = `${percent}%`; }
+        function addChapter() { const title = document.getElementById('chapter-title').value.trim(); const notes = document.getElementById('chapter-notes').value.trim(); if (!title || !notes) return alert("Заполните название главы и заметки!"); const now = new Date(); const dateStr = now.toLocaleDateString('ru-RU'); const newChapter = { id: Date.now().toString(), title: title, notes: notes, date: dateStr }; bookData.chapters.push(newChapter); document.getElementById('chapter-title').value = ''; document.getElementById('chapter-notes').value = ''; renderChapters(); saveData(); }
+        function deleteChapter(id) { if (confirm("Удалить эту запись?")) { bookData.chapters = bookData.chapters.filter(c => c.id !== id); renderChapters(); saveData(); } }
+        function renderChapters() { const list = document.getElementById('chapters-list'); list.innerHTML = ''; const sorted = [...bookData.chapters].sort((a, b) => b.id - a.id); sorted.forEach(chapter => { const card = document.createElement('div'); card.className = 'chapter-card'; card.innerHTML = `<button class="btn-delete-chapter" onclick="deleteChapter('${chapter.id}')" title="Удалить">❌</button><h3 class="chapter-title">${chapter.title}</h3><span class="chapter-date">Добавлено: ${chapter.date}</span><div class="chapter-notes">${chapter.notes}</div>`; list.appendChild(card); }); }
+
+        if (window.currentUserId !== undefined) { loadDataFromCloud(); } else { setTimeout(loadDataFromCloud, 1000); }
+    </script>
+</body>
+</html>

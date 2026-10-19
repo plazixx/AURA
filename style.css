@@ -1,0 +1,174 @@
+/* =========================================
+   БАЗОВЫЕ СТИЛИ
+   ========================================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background-color: #050505;
+    color: #d4d4d4;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    transition: background 0.5s ease;
+}
+
+/* Падающие частицы */
+.particle {
+    position: fixed; top: -10px; font-family: Arial, sans-serif;
+    user-select: none; pointer-events: none; z-index: 0;
+    animation: fall linear infinite; opacity: 0.8;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+@keyframes fall { 0% { transform: translateY(-10px) rotate(0deg); } 100% { transform: translateY(100vh) rotate(360deg); } }
+
+/* Фоновая геометрия */
+.background-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
+.shape { position: absolute; background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 0 15px rgba(255, 255, 255, 0.05); }
+.triangle { width: 0; height: 0; border-left: 50px solid transparent; border-right: 50px solid transparent; border-bottom: 86px solid rgba(255, 255, 255, 0.05); top: 20%; left: 10%; animation: float 15s infinite linear; }
+.triangle-2 { border-bottom-color: rgba(255, 255, 255, 0.03); top: 70%; left: 80%; transform: scale(2) rotate(45deg); animation: float 20s infinite linear reverse; }
+.square { width: 100px; height: 100px; top: 60%; left: 15%; transform: rotate(15deg); animation: rotateFloat 25s infinite linear; }
+.line { width: 300px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); top: 30%; left: -300px; animation: moveLine 8s infinite linear; }
+.circle { width: 200px; height: 200px; border-radius: 50%; border: 1px dashed rgba(255, 255, 255, 0.1); top: 10%; right: -50px; animation: rotateFloat 30s infinite linear; }
+
+/* Контейнер */
+.container { width: 100%; max-width: 1100px; display: flex; flex-direction: column; min-height: 90vh; padding: 20px; z-index: 10; position: relative; }
+.top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #222; margin-bottom: 40px; font-family: 'Courier New', monospace; color: #666; font-size: 0.9rem; }
+.logo { font-weight: bold; letter-spacing: 2px; transition: color 0.5s; }
+
+/* Главная */
+.main-layout { display: flex; gap: 40px; flex-grow: 1; }
+.assistant-panel { flex: 0 0 250px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(10, 10, 10, 0.6); border: 1px solid #222; border-radius: 12px; padding: 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+.assistant-text { font-family: 'Courier New', monospace; font-size: 0.85rem; text-align: left; width: 100%; margin-top: 20px; line-height: 1.4; min-height: 60px; transition: color 0.5s; }
+.assistant-figure { width: 150px; height: 150px; filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2)); }
+.figure-svg { width: 100%; height: 100%; animation: pulseFigure 3s infinite alternate; }
+.figure-svg path, .figure-svg circle { transition: stroke 0.5s, fill 0.5s; }
+
+.menu-section { flex: 1; }
+.main-header h1 { font-size: 2.2rem; margin-bottom: 10px; transition: color 0.5s; }
+.main-header p { color: #888; font-size: 1rem; letter-spacing: 1px; }
+.menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+/* Кнопки меню */
+.menu-btn { display: flex; align-items: center; background-color: rgba(20, 20, 20, 0.7); backdrop-filter: blur(5px); border: 1px solid #333; border-radius: 10px; padding: 20px; text-decoration: none; color: #fff; transition: all 0.3s ease; position: relative; overflow: hidden; animation: slideUp 0.6s ease-out backwards; }
+.menu-btn:nth-child(1) { animation-delay: 0.1s; } .menu-btn:nth-child(2) { animation-delay: 0.2s; } .menu-btn:nth-child(3) { animation-delay: 0.3s; } .menu-btn:nth-child(4) { animation-delay: 0.4s; } .menu-btn:nth-child(5) { animation-delay: 0.5s; } .menu-btn:nth-child(6) { animation-delay: 0.6s; }
+.menu-btn::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent); transition: all 0.5s ease; }
+.menu-btn:hover::after { left: 100%; }
+.menu-btn:hover { transform: translateX(10px); background-color: rgba(30, 30, 30, 0.8); }
+.btn-icon { font-size: 2rem; margin-right: 15px; transition: all 0.3s ease; }
+.menu-btn:hover .btn-icon { transform: scale(1.2); }
+.btn-content { display: flex; flex-direction: column; text-align: left; }
+.btn-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 5px; transition: color 0.5s; }
+.btn-desc { font-size: 0.8rem; color: #777; }
+
+/* Внутренние страницы */
+.back-btn { display: inline-block; margin-bottom: 30px; text-decoration: none; font-weight: bold; padding: 10px 20px; border: 1px solid #555; border-radius: 8px; transition: all 0.3s; align-self: flex-start; color: #fff; }
+.back-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
+.content-box { background: rgba(15, 15, 15, 0.9); border: 1px solid #222; padding: 40px; border-radius: 12px; text-align: left; line-height: 1.7; box-shadow: 0 10px 30px rgba(0,0,0,0.8); width: 100%; transition: border-color 0.5s; }
+.content-box h2 { margin-top: 25px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; transition: color 0.5s; }
+.content-box h2:first-child { margin-top: 0; }
+.content-box p, .content-box ul { color: #b0b0b0; margin-bottom: 15px; }
+
+/* Статус-бар */
+.status-bar { margin-top: 30px; padding-top: 20px; border-top: 1px solid #222; display: flex; align-items: center; justify-content: center; color: #666; font-size: 0.9rem; font-family: 'Courier New', monospace; }
+.status-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 10px; animation: pulse 2s infinite; }
+
+/* Анимации */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255,255,255, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255,255,255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255, 0); } }
+@keyframes float { 0% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-50px) rotate(180deg); } 100% { transform: translateY(0) rotate(360deg); } }
+@keyframes rotateFloat { 0% { transform: rotate(0deg) translateX(0); } 50% { transform: rotate(180deg) translateX(30px); } 100% { transform: rotate(360deg) translateX(0); } }
+@keyframes moveLine { 0% { left: -300px; } 100% { left: 100%; } }
+@keyframes pulseFigure { 0% { filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.1)); } 100% { filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.4)); } }
+
+@media (max-width: 900px) { 
+    .main-layout { flex-direction: column; } 
+    .assistant-panel { flex: 0 0 auto; width: 100%; margin-bottom: 20px; flex-direction: row; gap: 20px; } 
+    .assistant-text { margin-top: 0; } 
+}
+@media (max-width: 600px) { .menu-grid { grid-template-columns: 1fr; } .main-header h1 { font-size: 1.8rem; } .assistant-panel { flex-direction: column; } }
+
+/* =========================================
+   НОВОГОДНЯЯ ЁЛКА
+   ========================================= */
+.neon-tree { position: fixed; bottom: 20px; left: 20px; width: 100px; height: 150px; z-index: 5; animation: treeFloat 4s ease-in-out infinite; display: none; flex-direction: column; align-items: center; pointer-events: none; }
+.star { color: #ffcc00; font-size: 1.5rem; text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00; margin-bottom: -10px; z-index: 10; }
+.tree-triangle { width: 0; height: 0; border-left: 40px solid transparent; border-right: 40px solid transparent; border-bottom: 40px solid rgba(163, 255, 18, 0.2); box-shadow: 0 0 10px rgba(163, 255, 18, 0.5); border-top: 2px solid #a3ff12; margin-top: -15px; transition: 0.3s; }
+.t1 { border-left-width: 30px; border-right-width: 30px; border-bottom-width: 30px; }
+.t2 { border-left-width: 40px; border-right-width: 40px; border-bottom-width: 40px; }
+.t3 { border-left-width: 50px; border-right-width: 50px; border-bottom-width: 50px; }
+.tree-trunk { width: 10px; height: 15px; background: #333; box-shadow: 0 0 5px #a3ff12; }
+@keyframes treeFloat { 0% { transform: translateY(0); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0); } }
+@media (max-width: 768px) { .neon-tree { display: none !important; } }
+
+/* =========================================
+   4 СЕЗОННЫЕ ТЕМЫ
+   ========================================= */
+
+/* --- 1. Хэллоуин (Сентябрь - Ноябрь) --- */
+body.theme-halloween { background-image: radial-gradient(circle at 50% 0%, #1a0a05 0%, #050505 70%); }
+body.theme-halloween .logo, body.theme-halloween .main-header h1, body.theme-halloween .btn-text, body.theme-halloween .assistant-text, body.theme-halloween .date { color: #ff6600; text-shadow: 0 0 10px rgba(255, 102, 0, 0.5); }
+body.theme-halloween .menu-btn:hover { border-color: #ff6600; box-shadow: 0 0 20px rgba(255, 102, 0, 0.2); }
+body.theme-halloween .menu-btn::after { background: linear-gradient(90deg, transparent, #ff6600, transparent); }
+body.theme-halloween .status-dot { background-color: #ff6600; box-shadow: 0 0 10px #ff6600; }
+body.theme-halloween .figure-svg path { stroke: #ff6600; }
+body.theme-halloween .figure-svg circle { fill: #ff6600; }
+body.theme-halloween .back-btn { color: #ff6600; border-color: #ff6600; } body.theme-halloween .back-btn:hover { background-color: #ff6600; color: #000; }
+body.theme-halloween .content-box { border-left: 6px solid #ff6600; } body.theme-halloween .content-box h2 { color: #ff6600; }
+
+/* --- 2. Новый год (Декабрь - Февраль) --- */
+body.theme-newyear { background-image: radial-gradient(circle at 50% 0%, #151a10 0%, #050505 70%); }
+body.theme-newyear .logo, body.theme-newyear .main-header h1, body.theme-newyear .btn-text, body.theme-newyear .assistant-text, body.theme-newyear .date { color: #a3ff12; text-shadow: 0 0 10px rgba(163, 255, 18, 0.5); }
+body.theme-newyear .menu-btn:hover { border-color: #a3ff12; box-shadow: 0 0 20px rgba(163, 255, 18, 0.2); }
+body.theme-newyear .menu-btn::after { background: linear-gradient(90deg, transparent, #a3ff12, transparent); }
+body.theme-newyear .status-dot { background-color: #a3ff12; box-shadow: 0 0 10px #a3ff12; }
+body.theme-newyear .figure-svg path { stroke: #a3ff12; }
+body.theme-newyear .figure-svg circle { fill: #a3ff12; }
+body.theme-newyear .back-btn { color: #a3ff12; border-color: #a3ff12; } body.theme-newyear .back-btn:hover { background-color: #a3ff12; color: #000; }
+body.theme-newyear .content-box { border-left: 6px solid #a3ff12; } body.theme-newyear .content-box h2 { color: #a3ff12; }
+body.theme-newyear .neon-tree { display: flex; }
+
+/* --- 3. Весна (Март - Май) --- */
+body.theme-spring { background-image: radial-gradient(circle at 50% 0%, #1a0a12 0%, #050505 70%); }
+body.theme-spring .logo, body.theme-spring .main-header h1, body.theme-spring .btn-text, body.theme-spring .assistant-text, body.theme-spring .date { color: #ff99cc; text-shadow: 0 0 10px rgba(255, 153, 204, 0.5); }
+body.theme-spring .menu-btn:hover { border-color: #ff99cc; box-shadow: 0 0 20px rgba(255, 153, 204, 0.2); }
+body.theme-spring .menu-btn::after { background: linear-gradient(90deg, transparent, #ff99cc, transparent); }
+body.theme-spring .status-dot { background-color: #ff99cc; box-shadow: 0 0 10px #ff99cc; }
+body.theme-spring .figure-svg path { stroke: #ff99cc; }
+body.theme-spring .figure-svg circle { fill: #ff99cc; }
+body.theme-spring .back-btn { color: #ff99cc; border-color: #ff99cc; } body.theme-spring .back-btn:hover { background-color: #ff99cc; color: #000; }
+body.theme-spring .content-box { border-left: 6px solid #ff99cc; } body.theme-spring .content-box h2 { color: #ff99cc; }
+
+/* --- 4. Лето (Июнь - Август) --- */
+body.theme-summer { background-image: radial-gradient(circle at 50% 0%, #0a1a1a 0%, #050505 70%); }
+body.theme-summer .logo, body.theme-summer .main-header h1, body.theme-summer .btn-text, body.theme-summer .assistant-text, body.theme-summer .date { color: #00ffff; text-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
+body.theme-summer .menu-btn:hover { border-color: #00ffff; box-shadow: 0 0 20px rgba(0, 255, 255, 0.2); }
+body.theme-summer .menu-btn::after { background: linear-gradient(90deg, transparent, #00ffff, transparent); }
+body.theme-summer .status-dot { background-color: #00ffff; box-shadow: 0 0 10px #00ffff; }
+body.theme-summer .figure-svg path { stroke: #00ffff; }
+body.theme-summer .figure-svg circle { fill: #00ffff; }
+body.theme-summer .back-btn { color: #00ffff; border-color: #00ffff; } body.theme-summer .back-btn:hover { background-color: #00ffff; color: #000; }
+body.theme-summer .content-box { border-left: 6px solid #00ffff; } body.theme-summer .content-box h2 { color: #00ffff; }
+
+/* =========================================
+   СТИЛИ ДЛЯ СТРАНИЦЫ ДОСТИЖЕНИЙ
+   ========================================= */
+.achieve-form { background: #141414; border: 1px solid #333; border-radius: 10px; padding: 20px; margin-bottom: 30px; display: flex; flex-direction: column; gap: 15px; }
+.achieve-form input, .achieve-form textarea { padding: 12px; background: #050505; border: 1px solid #333; color: #fff; border-radius: 6px; outline: none; font-family: inherit; }
+.achieve-form textarea { resize: vertical; min-height: 80px; }
+.achieve-form input:focus, .achieve-form textarea:focus { border-color: var(--theme-color, #a3ff12); }
+.achieve-form button { background: var(--theme-color, #a3ff12); color: #000; border: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; align-self: flex-start; transition: 0.3s; }
+.achieve-form button:hover { background: #fff; box-shadow: 0 0 15px var(--theme-color, #a3ff12); }
+.achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.achieve-card { background: #111; border: 1px solid #222; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; transition: 0.3s; }
+.achieve-card:hover { transform: translateY(-5px); border-color: var(--theme-color, #a3ff12); }
+.achieve-img { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 15px; display: none; }
+.achieve-title { color: var(--theme-color, #a3ff12); font-size: 1.2rem; margin-bottom: 10px; }
+.achieve-desc { color: #aaa; font-size: 0.95rem; line-height: 1.5; margin-bottom: 15px; flex-grow: 1; }
+.achieve-date { font-size: 0.8rem; color: #666; font-family: 'Courier New', monospace; margin-bottom: 10px; }
+.btn-delete-achieve { background: transparent; border: 1px solid #ff3333; color: #ff3333; padding: 6px 12px; border-radius: 4px; cursor: pointer; align-self: flex-end; transition: 0.2s; }
+.btn-delete-achieve:hover { background: #ff3333; color: #000; }
