@@ -6,6 +6,7 @@
     <title>Мой Личный Хаб</title>
     <link rel="stylesheet" href="style.css">
     <script src="season.js"></script>
+    <script src="auth.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -118,6 +119,7 @@
                     <a href="dead-book.html" class="menu-btn" data-info="&gt; ВНИМАНИЕ! Доступ к архиву...<br>&gt; Найдены заброшенные проекты."><span class="btn-icon">💀</span><div class="btn-content"><span class="btn-text">Мёртвая книга</span><span class="btn-desc">Архив идей</span></div></a>
                     <a href="chart.html" class="menu-btn" data-info="&gt; Построение графика...<br>&gt; Загрузка данных... OK."><span class="btn-icon">📊</span><div class="btn-content"><span class="btn-text">График дня</span><span class="btn-desc">Статистика прогресса</span></div></a>
                     <a href="achievements.html" class="menu-btn" data-info="&gt; Загрузка архива побед...<br>&gt; Синхронизация достижений... OK."><span class="btn-icon">🏆</span><div class="btn-content"><span class="btn-text">Мои достижения</span><span class="btn-desc">Личные победы</span></div></a>
+                    <a href="finance.html" class="menu-btn" data-info="&gt; Загрузка финансового модуля...<br>&gt; Синхронизация счёта... OK."><span class="btn-icon">💰</span><div class="btn-content"><span class="btn-text">Мои финансы</span><span class="btn-desc">Доходы и расходы</span></div></a>
                 </main>
             </div>
         </div>
